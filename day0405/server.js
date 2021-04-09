@@ -12,7 +12,7 @@ var conStr={
     database:"nodejs",
     user:"root",
     password:"1234"
-}
+};
 
 var server = http.createServer(function(request, response){
     //결국 서버는 클라이언트의 다양한 요청을 처리하기 위해, 요청을 구분할 수 있어야 한다..
