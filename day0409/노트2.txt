@@ -1,0 +1,156 @@
+SQL> --시퀀스 조회
+SQL> insert into news(news_id, title) values(seq_news.nextval, 'test');
+
+1 row created.
+
+SQL> select seq_news.currval from dual;
+
+   CURRVAL                                                                      
+----------                                                                      
+         1                                                                      
+
+SQL> desc dual;
+ Name                                      Null?    Type
+ ----------------------------------------- -------- ----------------------------
+ DUMMY                                              VARCHAR2(1)
+
+SQL> select * from dual;
+
+DU                                                                              
+--                                                                              
+X                                                                               
+
+SQL> --더미테이블이 필요한 이유
+SQL> --현재 날짜 출력하고 싶다 ??
+SQL> select sysdate from emp;
+select sysdate from emp
+                    *
+ERROR at line 1:
+ORA-00942: table or view does not exist 
+
+
+SQL> select sysdate from dual;
+
+SYSDATE                                                                         
+--------                                                                        
+21/04/12                                                                        
+
+SQL> select seq_news.currval from dual;
+
+   CURRVAL                                                                      
+----------                                                                      
+         1                                                                      
+
+SQL> --현재 세션에서 insert가 발생한 직후에 조회 가능
+SQL> select * from news;
+
+   NEWS_ID                                                                      
+----------                                                                      
+TITLE                                                                           
+--------------------------------------------------------------------------------
+WRITER                                                                          
+----------------------------------------                                        
+CONTENT                                                                         
+--------------------------------------------------------------------------------
+REGDATE         HIT                                                             
+-------- ----------                                                             
+         1                                                                      
+test                                                                            
+                                                                                
+
+   NEWS_ID                                                                      
+----------                                                                      
+TITLE                                                                           
+--------------------------------------------------------------------------------
+WRITER                                                                          
+----------------------------------------                                        
+CONTENT                                                                         
+--------------------------------------------------------------------------------
+REGDATE         HIT                                                             
+-------- ----------                                                             
+                                                                                
+21/04/12          0                                                             
+                                                                                
+
+SQL> select news_id, title from news;
+
+   NEWS_ID                                                                      
+----------                                                                      
+TITLE                                                                           
+--------------------------------------------------------------------------------
+         1                                                                      
+test                                                                            
+                                                                                
+
+SQL> select news_id, title from news;
+
+   NEWS_ID                                                                      
+----------                                                                      
+TITLE                                                                           
+--------------------------------------------------------------------------------
+         1                                                                      
+test                                                                            
+                                                                                
+         3                                                                      
+연습입니당                                                                      
+                                                                                
+
+SQL> select news_id, title from news;
+
+   NEWS_ID                                                                      
+----------                                                                      
+TITLE                                                                           
+--------------------------------------------------------------------------------
+         1                                                                      
+test                                                                            
+                                                                                
+         5                                                                      
+123                                                                             
+                                                                                
+         3                                                                      
+연습입니당                                                                      
+                                                                                
+
+   NEWS_ID                                                                      
+----------                                                                      
+TITLE                                                                           
+--------------------------------------------------------------------------------
+         4                                                                      
+123                                                                             
+                                                                                
+
+SQL> select * from comments;
+
+no rows selected
+
+SQL> select * from comments;
+
+no rows selected
+
+SQL> show tables;
+SP2-0158: unknown SHOW option "tables"
+SQL> show table;
+SP2-0158: unknown SHOW option "table"
+SQL> desc comments;
+ Name                                      Null?    Type
+ ----------------------------------------- -------- ----------------------------
+ COMMENTS_ID                               NOT NULL NUMBER
+ NEWS_ID                                            NUMBER
+ MSG                                                VARCHAR2(100)
+ AUTHOR                                             VARCHAR2(20)
+ WRITEDAY                                           DATE
+
+SQL> select * from comments;
+
+COMMENTS_ID    NEWS_ID                                                          
+----------- ----------                                                          
+MSG                                                                             
+--------------------------------------------------------------------------------
+AUTHOR                                   WRITEDAY                               
+---------------------------------------- --------                               
+          4         13                                                          
+그래                                                                            
+나도                                     21/04/12                               
+                                                                                
+
+SQL> exit

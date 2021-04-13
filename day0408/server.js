@@ -25,7 +25,7 @@ var upload = multer({
             cb(null, __dirname+"/static/upload");
         },
         filename:function(request, file, cb){
-            // console.log("file is", file);
+            console.log("file is", file);
             //업로드한 파일에 따라서 파일 확장자는 틀려진다.. 프로그래밍적으로 정보를 추출해야 한다!!
             // path.extname(file.originalfilename) 의 결과는 jpg, png...
             console.log("업로드된 파일의 확장자는", path.extname(file.originalname));
@@ -72,6 +72,7 @@ app.get("/gallery/list", function(request, response){
 app.post("/gallery/regist", upload.single("pic"), function(request, response){
     //파라미터 받기
     var title = request.body.title;
+    console.log(title);
     var writer = request.body.writer;
     var content = request.body.content;
     var filename = request.file.filename; //multer를 이용했기 때문에 기존의 request객체에 추가된 것임!!
@@ -121,18 +122,85 @@ app.get("/gallery/detail", function(request, response){
 });
 
 //삭제 요청 처리 (DB삭제 + 이미지삭제)
-app.get("/gallery/del", function(request, response){
+app.post("/gallery/del", upload.single("pic"), function(request, response){
 
-    var gallery_id = request.query.gallery_id;
-    var filename = request.query.filename;
+    var gallery_id = request.body.gallery_id;
+    var filename = request.body.filename;
+    console.log("gallery_id ", gallery_id);
     
     fs.unlink(__dirname+"/static/upload/" + filename, function(err){
-        console.log("삭제완료");
+        if(err){
+            console.log("삭제실패", err);
+        }else{
+            console.log("삭제성공");
+            //db도 지우자!!
+            var sql = "delete from gallery where gallery_id="+gallery_id;
+            var con = mysql.createConnection(conStr);
+            con.query(sql, function(error, fields){
+                if(error){
+                    console.log("삭제 실패", error);
+                }else{
+                    //목록 요청!!
+                    response.writeHead(200, {"Content-Type":"text/html;charset=utf-8"});
+                    response.end(mymodule.getMsgUrl("삭제 성공", "/gallery/list"));
+                }
+                con.end();
+            });
+        }
     });
+});
 
-    
-    var sql = "delete from gallery where gallery_id="+gallery_id;
-    response.end(sql);
+
+//수정 요청 처리(일단 업로드 컴포넌트를 사용하게되면, post는 무조건 업로드 컴포넌트 이용해야 함)
+app.post("/gallery/edit", upload.single("pic"), function(request, response){
+    var title = request.body.title;
+    var writer = request.body.writer;
+    var content = request.body.content;
+    var filename = request.body.filename;
+    var gallery_id = request.body.gallery_id;
+
+    //클라이언트가 업로드를 원하는지 안하는지를 구분??
+
+    //업로드시, request객체의 json 속성 중 file 이라는 속성이 판단대상...
+    // console.log("request.file ", request.file);
+
+    if(request.file != undefined){ //업로드를 원하는것임(사진 교체)   
+        //사진지우기 + db수정
+        fs.unlink(__dirname+"/static/upload/"+ filename, function(err){
+            if(err){
+                console.log("삭제실패", err);
+            }else{
+                filename = request.file.filename; //새롭게 업로드된 파일명으로 교체..
+                var sql = "update gallery set title=?, writer=?, content=?, filename=? where gallery_id=?";
+                
+                var con = mysql.createConnection(conStr); //mysql 접속
+                con.query(sql, [title,writer,content,filename,gallery_id], function(error, fields){
+                    if(err){
+                        console.log("수정실패", error);
+                    }else{
+                        response.writeHead(200, {"Content-Type":"text/html;charset=utf-8"});
+                        response.end(mymodule.getMsgUrl("수정완료", "/gallery/detail?gallery_id="+gallery_id));
+                    }
+                    con.end(); //mysql 종료!
+                });
+            }
+        });
+
+    }else{ //사진 유지
+        console.log("사진을 유지합니다.");      
+        var sql = "update gallery set title=?, writer=?, content=? where gallery_id=?";
+        var con = mysql.createConnection(conStr);
+        con.query(sql, [title,writer,content,gallery_id], function(error, fields){
+            if(error){
+                console.log(error);
+            }else{
+                response.writeHead(200, {"Content-Type":"text/html;charset=utf-8"});
+                response.end(mymodule.getMsgUrl("수정완료", "/gallery/detail?gallery_id="+gallery_id));
+            }
+            con.end();
+        });
+    }
+
 });
 
 var server = http.createServer(app); //기본 모듈에 express 모듈 연결

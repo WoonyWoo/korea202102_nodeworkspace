@@ -97,13 +97,23 @@ function getList(){
   location.href="/gallery/list";
 }
 
+//수정요청 (데이터의 양도 많고, 바이너리 파일도 포함될 수 있으므로 당연히 post(편지지=body), 봉투 X)
 function edit(){
-  
+  if(confirm("수정하실래요?")){
+    $("form").attr("action", "/gallery/edit"); 
+    $("form").attr("method", "post"); 
+    $("form").attr("enctype", "multipart/form-data");  
+    $("form").submit(); //전송행위가 발생!!
+  }
 }
 
 function del(){
   if(confirm("삭제하시겠어요?")){
-    location.href="/gallery/del?gallery_id=<%=gallery.gallery_id%>&filename=<%=gallery.filename%>";
+    $("form").attr("action", "/gallery/del"); 
+    $("form").attr("method", "post"); 
+    $("form").attr("enctype", "multipart/form-data");  //텍스트 아닌 바이너리 형식도 포함되어 있다..
+    //만일 이 속성을 지정하지 않으면, 절대로 바이너리 파일 전송은 불가능하다
+    $("form").submit(); //전송행위가 발생!!
 
   }
 }
